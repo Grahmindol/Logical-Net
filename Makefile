@@ -5,8 +5,8 @@ LDFLAGS = -lm
 TARGET = bin/main
 OBJDIR = bin/obj
 
-SRCS = main.c src/neurone.c
-OBJS = $(OBJDIR)/main.o $(OBJDIR)/neurone.o
+SRCS = main.c src/neurone.c src/layer.c src/network.c
+OBJS = $(OBJDIR)/main.o $(OBJDIR)/neurone.o $(OBJDIR)/layer.o $(OBJDIR)/network.o
 
 all: $(TARGET)
 
@@ -19,6 +19,12 @@ $(OBJDIR)/main.o: main.c | $(OBJDIR)
 $(OBJDIR)/neurone.o: src/neurone.c | $(OBJDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+$(OBJDIR)/layer.o: src/layer.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(OBJDIR)/network.o: src/network.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+	
 bin:
 	mkdir -p bin
 

@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 typedef float (*LogicFunc)(float, float);
+typedef float (*LogicDeriv)(float, float);
 
 float logic_false(float a, float b) { return 0.0f; }
 float logic_nor(float a, float b) { return (1 - a) * (1 - b); }
@@ -26,6 +27,63 @@ LogicFunc logic_table[16] = {
     logic_and, logic_xnor, logic_b, logic_a_or_not_b,
     logic_a, logic_not_a_or_b, logic_or, logic_true
 };
+
+// ∂f/∂a
+float dfa_false(float a, float b) { return 0.0f; }
+float dfa_nor(float a, float b) { return -(1 - b); }
+float dfa_nand_a(float a, float b) { return -b; }
+float dfa_not_a(float a, float b) { return -1.0f; }
+float dfa_nand_b(float a, float b) { return 1 - b; }
+float dfa_not_b(float a, float b) { return 0.0f; }
+float dfa_xor(float a, float b) { return 1 - 2 * b; }
+float dfa_nand(float a, float b) { return -b; }
+float dfa_and(float a, float b) { return b; }
+float dfa_xnor(float a, float b) { return b - (1 - b); }
+float dfa_b(float a, float b) { return 0.0f; }
+float dfa_a_or_not_b(float a, float b) { return 1 - (1 - b); }
+float dfa_a(float a, float b) { return 1.0f; }
+float dfa_not_a_or_b(float a, float b) { return -1 + b; }
+float dfa_or(float a, float b) { return 1 - b; }
+float dfa_true(float a, float b) { return 0.0f; }
+
+// ∂f/∂b
+float dfb_false(float a, float b) { return 0.0f; }
+float dfb_nor(float a, float b) { return -(1 - a); }
+float dfb_nand_a(float a, float b) { return 1 - a; }
+float dfb_not_a(float a, float b) { return 0.0f; }
+float dfb_nand_b(float a, float b) { return -a; }
+float dfb_not_b(float a, float b) { return -1.0f; }
+float dfb_xor(float a, float b) { return 1 - 2 * a; }
+float dfb_nand(float a, float b) { return -a; }
+float dfb_and(float a, float b) { return a; }
+float dfb_xnor(float a, float b) { return a - (1 - a); }
+float dfb_b(float a, float b) { return 1.0f; }
+float dfb_a_or_not_b(float a, float b) { return -a + 1; }
+float dfb_a(float a, float b) { return 0.0f; }
+float dfb_not_a_or_b(float a, float b) { return 1 - (1 - a); }
+float dfb_or(float a, float b) { return 1 - a; }
+float dfb_true(float a, float b) { return 0.0f; }
+
+// Tables
+LogicDeriv logic_deriv[2][16] = {{
+    dfa_false, dfa_nor, dfa_nand_a, dfa_not_a,
+    dfa_nand_b, dfa_not_b, dfa_xor, dfa_nand,
+    dfa_and, dfa_xnor, dfa_b, dfa_a_or_not_b,
+    dfa_a, dfa_not_a_or_b, dfa_or, dfa_true
+},{
+    dfb_false, dfb_nor, dfb_nand_a, dfb_not_a,
+    dfb_nand_b, dfb_not_b, dfb_xor, dfb_nand,
+    dfb_and, dfb_xnor, dfb_b, dfb_a_or_not_b,
+    dfb_a, dfb_not_a_or_b, dfb_or, dfb_true
+}};
+
+float gradient_neurone(Neurone *n, int input_id) {
+    float sum = 0;
+    for (int i = 0; i < 16; i++) {
+        sum += n->weights[i] * logic_deriv[input_id&1][i](n->a, n->b);
+    }
+    return sum;
+}
 
 void normalize_neurone_softmax(Neurone *n) {
     float max = n->logits[0];
