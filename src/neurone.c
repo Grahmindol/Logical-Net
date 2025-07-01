@@ -1,5 +1,6 @@
 #include "neurone.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 typedef float (*LogicFunc)(float, float);
 typedef float (*LogicDeriv)(float, float);
@@ -77,6 +78,21 @@ LogicDeriv logic_deriv[2][16] = {{
     dfb_a, dfb_not_a_or_b, dfb_or, dfb_true
 }};
 
+// Créer un neurone
+Neurone *create_neurone() {
+    Neurone *n = (Neurone*)malloc(sizeof(Neurone));
+    for (int i = 0; i < 16; i++) {
+        n->logits[i] = ((float)rand() / RAND_MAX) * 2.0f - 1.0f;
+    }
+    normalize_neurone_softmax(n);
+    return n;
+}
+
+// Supprimer un neurone
+void free_neurone(Neurone *n) {
+    free(n);
+}
+
 float gradient_neurone(Neurone *n, int input_id) {
     float sum = 0;
     for (int i = 0; i < 16; i++) {
@@ -86,18 +102,23 @@ float gradient_neurone(Neurone *n, int input_id) {
 }
 
 void normalize_neurone_softmax(Neurone *n) {
-    float max = n->logits[0];
+    float temperature = 2.0f;
+
+    // Chercher max après division
+    float max = n->logits[0] / temperature;
     for (int i = 1; i < 16; i++)
-        if (n->logits[i] > max) max = n->logits[i];
+        if (n->logits[i] / temperature > max) max = n->logits[i] / temperature;
+
     float sum = 0.0f;
     for (int i = 0; i < 16; i++) {
-        n->weights[i] = expf(n->logits[i] - max);
+        n->weights[i] = expf((n->logits[i] / temperature) - max);
         sum += n->weights[i];
     }
     for (int i = 0; i < 16; i++) {
         n->weights[i] /= sum;
     }
 }
+
 
 float forward(Neurone *n, float a, float b) {
     n->a = a;

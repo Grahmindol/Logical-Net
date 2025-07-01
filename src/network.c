@@ -1,5 +1,82 @@
 #include "network.h"
 #include <stdlib.h>
+#include <stdio.h>
+
+// Créer un réseau
+Network *create_network(int num_layers, int *layer_sizes) {
+    Network *net = (Network*)malloc(sizeof(Network));
+    net->num_layers = num_layers;
+    net->layers = (Layer*)malloc(sizeof(Layer) * num_layers);
+
+    for (int i = 0; i < num_layers; i++) {
+        net->layers[i].size = layer_sizes[i];
+        net->layers[i].neurones = (Neurone*)malloc(sizeof(Neurone) * layer_sizes[i]);
+        for (int j = 0; j < layer_sizes[i]; j++) {
+            for (int k = 0; k < 16; k++) {
+                net->layers[i].neurones[j].logits[k] = ((float)rand() / RAND_MAX) * 2.0f - 1.0f;
+            }
+            normalize_neurone_softmax(&net->layers[i].neurones[j]);
+        }
+    }
+    return net;
+}
+
+// Supprimer un réseau
+void free_network(Network *net) {
+    for (int i = 0; i < net->num_layers; i++) {
+        free(net->layers[i].neurones);
+    }
+    free(net->layers);
+    free(net);
+}
+
+const char *logic_names[16] = {
+    "FALSE", "NOR", "NAND_A", "NOT_A",
+    "NAND_B", "NOT_B", "XOR", "NAND",
+    "AND", "XNOR", "B", "A_OR_NOT_B",
+    "A", "NOT_A_OR_B", "OR", "TRUE"
+};
+
+void print_network(Network *net) {
+    printf("╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗\n");
+    // En-tête
+    printf("║ %8s │", "Neurone");
+    for (int i = 0; i < 16; i++) {
+        printf(" %10s │", logic_names[i]);
+    }
+    printf("\n");
+    printf("╠════════════════╤");
+    for (int i = 0; i < 16; i++) {
+        printf("───────────────┼");
+    }
+    printf("\n");
+
+    int neuron_idx = 0;
+    for (int l = 0; l < net->num_layers; l++) {
+        Layer *layer = &net->layers[l];
+        for (int n = 0; n < layer->size; n++) {
+            printf("║ L%d-N%d    │", l, n);
+            for (int i = 0; i < 16; i++) {
+                printf(" %10.3f │", layer->neurones[n].weights[i]); //---------------------------------------------------------------
+            }
+            printf("\n");
+        }
+
+        // Séparateur horizontal après chaque couche
+        if (l != net->num_layers - 1) {
+            printf("╟──────────────╧");
+            for (int i = 0; i < 16; i++) {
+                printf("───────────────┼");
+            }
+            printf("\n");
+        }
+    }
+    printf("╚════════════════╧");
+    for (int i = 0; i < 16; i++) {
+        printf("───────────────┴");
+    }
+    printf("\n");
+}
 
 void forward_network(Network *net, float *inputs, int input_size, float *final_outputs){
     float *current_in = inputs;

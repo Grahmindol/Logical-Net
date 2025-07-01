@@ -10,6 +10,9 @@ typedef struct {
     float a, b;
 } Neurone;
 
+void free_neurone(Neurone *n);
+Neurone *create_neurone();
+
 void backward(Neurone *n, float grad_output, float learning_rate);
 float forward(Neurone *n, float a, float b);
 
