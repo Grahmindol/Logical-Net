@@ -33,49 +33,46 @@ void free_network(Network *net) {
 const char *logic_names[16] = {
     "FALSE", "NOR", "NAND_A", "NOT_A",
     "NAND_B", "NOT_B", "XOR", "NAND",
-    "AND", "XNOR", "B", "A_OR_NOT_B",
-    "A", "NOT_A_OR_B", "OR", "TRUE"
+    "AND", "XNOR", "B", "B => A",
+    "A", "A => B", "OR", "TRUE"
 };
 
 void print_network(Network *net) {
-    printf("╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗\n");
+    printf("╔══════════╤");
+    for (int i = 0; i < 15; i++) printf("════════╤");
+    printf("════════╗\n");
+    
     // En-tête
     printf("║ %8s │", "Neurone");
-    for (int i = 0; i < 16; i++) {
-        printf(" %10s │", logic_names[i]);
-    }
-    printf("\n");
-    printf("╠════════════════╤");
-    for (int i = 0; i < 16; i++) {
-        printf("───────────────┼");
-    }
-    printf("\n");
+    for (int i = 0; i < 15; i++) printf(" %6s │", logic_names[i]);
+    printf(" %6s ║\n", logic_names[15]);
+    printf("╠══════════╪");
+    for (int i = 0; i < 15; i++) printf("════════╪");
+    printf("════════╣\n");
 
     int neuron_idx = 0;
     for (int l = 0; l < net->num_layers; l++) {
         Layer *layer = &net->layers[l];
         for (int n = 0; n < layer->size; n++) {
-            printf("║ L%d-N%d    │", l, n);
+            printf("║ L%d-N%d    ", l, n);
             for (int i = 0; i < 16; i++) {
-                printf(" %10.3f │", layer->neurones[n].weights[i]); //---------------------------------------------------------------
+                float w = layer->neurones[n].weights[i];
+                int gray_level = 232 + (int)(w * 23); // 232 à 255 = 24 niveaux
+                printf("│\x1b[38;5;%dm %6.3f \x1b[0m", gray_level, w); //---------------------------------------------------------------
             }
-            printf("\n");
+            printf("║\n");
         }
 
         // Séparateur horizontal après chaque couche
         if (l != net->num_layers - 1) {
-            printf("╟──────────────╧");
-            for (int i = 0; i < 16; i++) {
-                printf("───────────────┼");
-            }
-            printf("\n");
+            printf("╟──────────┼");
+            for (int i = 0; i < 15; i++)  printf("────────┼");
+            printf("────────╢\n");
         }
     }
-    printf("╚════════════════╧");
-    for (int i = 0; i < 16; i++) {
-        printf("───────────────┴");
-    }
-    printf("\n");
+    printf("╚══════════╧");
+    for (int i = 0; i < 15; i++) printf("════════╧");
+    printf("════════╝\n");
 }
 
 void forward_network(Network *net, float *inputs, int input_size, float *final_outputs){
