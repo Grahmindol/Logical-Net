@@ -101,8 +101,20 @@ float gradient_neurone(Neurone *n, int input_id) {
     return sum;
 }
 
+// Trouver l'ID de porte logique dominant
+int get_dominante_gate_id(Neurone *n){
+    int best_id = 0;
+    float best_w = n->weights[0];
+    for (int i = 1; i < 16; ++i)
+        if (n->weights[i] > best_w) {
+            best_w = n->weights[i];
+            best_id = i;
+    }
+    return best_id;
+}
+
 void normalize_neurone_softmax(Neurone *n) {
-    float temperature = 2.0f;
+    float temperature = 3.0f;
 
     // Chercher max après division
     float max = n->logits[0] / temperature;

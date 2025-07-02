@@ -2,15 +2,16 @@
 #include <stdlib.h>
 
 // Créer une couche
-Layer *create_layer(int size) {
-    Layer *layer = (Layer*)malloc(sizeof(Layer));
-    layer->size = size;
-    layer->neurones = (Neurone*)malloc(sizeof(Neurone) * size);
+Layer create_layer(int size, int input_size) {
+    Layer layer;
+    layer.size = size;
+    layer.input_size = input_size;
+    layer.neurones = (Neurone*)malloc(sizeof(Neurone) * size);
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < 16; j++) {
-            layer->neurones[i].logits[j] = ((float)rand() / RAND_MAX) * 2.0f - 1.0f;
+            layer.neurones[i].logits[j] = ((float)rand() / RAND_MAX) * 2.0f - 1.0f;
         }
-        normalize_neurone_softmax(&layer->neurones[i]);
+        normalize_neurone_softmax(&layer.neurones[i]);
     }
     return layer;
 }
@@ -21,14 +22,21 @@ void free_layer(Layer *layer) {
     free(layer);
 }
 
+void get_input_ids(int id, int size_in, int* a, int* b){
+    *a = (id * 2 + (int)(id/size_in))%size_in;
+    *b = (id * 2 + 1 + (int)(id/size_in))%size_in;
+}
 
-void backward_layer(Layer *l, float* grad_output, int size_grad_output, float* grad_in, float learning_rate){
-    for (int i = 0; i < 2*l->size; i++) grad_in[i] = 0;
+
+void backward_layer(Layer *l, float* grad_output, float* grad_in, float learning_rate){
+    for (int i = 0; i < l->input_size; i++) grad_in[i] = 0;
     
-    for (int i = 0; i < size_grad_output; i++){
-        backward(&l->neurones[i % l->size],grad_output[i],learning_rate);
-        grad_in[2*(i % l->size)] += gradient_neurone(&l->neurones[i % l->size],0) * grad_output[i];
-        grad_in[2*(i % l->size)+1] += gradient_neurone(&l->neurones[i % l->size],1) * grad_output[i];
+    for (int i = 0; i < l->size; i++){
+        backward(&l->neurones[i],grad_output[i],learning_rate);
+        int a , b;
+        get_input_ids(i,l->input_size,&a,&b);
+        grad_in[a] += gradient_neurone(&l->neurones[i],0) * grad_output[i];
+        grad_in[b] += gradient_neurone(&l->neurones[i],1) * grad_output[i];
     }
 
     // Normalisation du gradient d'entrée
@@ -52,11 +60,11 @@ void backward_layer(Layer *l, float* grad_output, int size_grad_output, float* g
  * @param size_in int 
  * @param out float array of size : "l.size"
  */
-void forward_layer(Layer *l, float* in, int size_in, float* out){
+void forward_layer(Layer *l, float* in, float* out){
     for (int i = 0; i < l->size; i++)
     {
-        int a = (i * 2)%size_in;
-        int b = (i * 2 + 1 )%size_in;
+        int a , b;
+        get_input_ids(i,l->input_size,&a,&b);
         out[i] = forward(&l->neurones[i],in[a],in[b]);
     }
 }

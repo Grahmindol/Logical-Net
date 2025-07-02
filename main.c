@@ -24,8 +24,8 @@ int main(int argc, char const *argv[]) {
     srand(time(NULL));
 
     // Architecture : 2 couches → 2 neurones, puis 1 neurone en sortie
-    int layer_sizes[2] = {2, 1};
-    Network *net = create_network(2, layer_sizes);
+    int layer_sizes[5] = {4, 8, 4, 2, 1};
+    Network *net = create_network(4, layer_sizes);
 
     const float lr = 0.01f;
     const int epochs = 100000;
@@ -49,7 +49,7 @@ int main(int argc, char const *argv[]) {
             };
 
             float outputs[1];
-            forward_network(net, inputs, 4, outputs);
+            forward_network(net, inputs, outputs);
 
             // Cible
             float target_outputs[1];
@@ -63,7 +63,7 @@ int main(int argc, char const *argv[]) {
             total_loss += loss(outputs[0], target_outputs[0]);
 
             // Rétroprop (attention : grad_size = 1 ici)
-            backward_network(net, grad_out, 1, lr, inputs);
+            backward_network(net, grad_out, lr);
         }
 
         if (e % 5000 == 0) {
@@ -87,7 +87,7 @@ int main(int argc, char const *argv[]) {
             (float)bin_inputs[3]
         };
         float outputs[1];
-        forward_network(net, inputs, 4, outputs);
+        forward_network(net, inputs, outputs);
 
         float target_outputs[1];
         target(bin_inputs, target_outputs);

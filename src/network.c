@@ -9,14 +9,7 @@ Network *create_network(int num_layers, int *layer_sizes) {
     net->layers = (Layer*)malloc(sizeof(Layer) * num_layers);
 
     for (int i = 0; i < num_layers; i++) {
-        net->layers[i].size = layer_sizes[i];
-        net->layers[i].neurones = (Neurone*)malloc(sizeof(Neurone) * layer_sizes[i]);
-        for (int j = 0; j < layer_sizes[i]; j++) {
-            for (int k = 0; k < 16; k++) {
-                net->layers[i].neurones[j].logits[k] = ((float)rand() / RAND_MAX) * 2.0f - 1.0f;
-            }
-            normalize_neurone_softmax(&net->layers[i].neurones[j]);
-        }
+        net->layers[i] = create_layer(layer_sizes[i+1], layer_sizes[i]);
     }
     return net;
 }
@@ -75,18 +68,17 @@ void print_network(Network *net) {
     printf("════════╝\n");
 }
 
-void forward_network(Network *net, float *inputs, int input_size, float *final_outputs){
+void forward_network(Network *net, float *inputs, float *final_outputs){
     float *current_in = inputs;
     float *outputs = NULL;
 
     for (int l = 0; l < net->num_layers; l++) {
         Layer *layer = &net->layers[l];
         outputs = (float *)malloc(sizeof(float) * layer->size);
-        forward_layer(layer, current_in, input_size, outputs);
+        forward_layer(layer, current_in, outputs);
 
         if (l != 0) free((void*)current_in);
         current_in = outputs;
-        input_size = layer->size;
     }
 
     for (int i = 0; i < net->layers[net->num_layers-1].size; i++) {
@@ -96,7 +88,7 @@ void forward_network(Network *net, float *inputs, int input_size, float *final_o
 }
 
 
-void backward_network(Network *net, float *grad_final, int grad_size, float learning_rate, float *inputs) {
+void backward_network(Network *net, float *grad_final, float learning_rate) {
     float *grad_current = grad_final;
     float *grad_prev = NULL;
 
@@ -104,11 +96,10 @@ void backward_network(Network *net, float *grad_final, int grad_size, float lear
         Layer *layer = &net->layers[l];
 
         grad_prev = (float *)malloc(sizeof(float) * layer->size * 2);
-        backward_layer(layer, grad_current, grad_size, grad_prev, learning_rate);
+        backward_layer(layer, grad_current, grad_prev, learning_rate);
 
         if (l != net->num_layers - 1) free(grad_current);
         grad_current = grad_prev;
-        grad_size = layer->size * 2;
     }
 
     free(grad_current);
