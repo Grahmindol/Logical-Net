@@ -13,9 +13,7 @@ Network *create_network(int num_layers, int *layer_sizes) {
 
 // Supprimer un réseau
 void free_network(Network *net) {
-    for (int i = 0; i < net->num_layers; i++) {
-        free(net->layers[i].neurones);
-    }
+    for (int i = 0; i < net->num_layers; i++) free_layer(net->layers[i]);
     free(net->layers);
     free(net);
 }
@@ -45,11 +43,26 @@ void print_network(Network *net) {
         for (int n = 0; n < layer->size; n++) {
             printf("║ L%d-N%d    ", l, n);
             for (int i = 0; i < 16; i++) {
-                float w = layer->neurones[n].weights[i];
+                float w = layer->neurones[n].gate_weights[i];
                 int gray_level = 232 + (int)(w * 23); // 232 à 255 = 24 niveaux
                 printf("│\x1b[38;5;%dm %6.3f \x1b[0m", gray_level, w); //---------------------------------------------------------------
             }
             printf("║\n");
+            printf("║ link A   ", l, n);
+            for (int i = 0; i < layer->neurones[n].inputs_size; i++) {
+                float w = layer->neurones[n].link_weights[0][i];
+                int gray_level = 232 + (int)(w * 23); // 232 à 255 = 24 niveaux
+                printf("│\x1b[38;5;%dm %6.3f \x1b[0m", gray_level, w); //---------------------------------------------------------------
+            }
+            printf("║\n");
+            printf("║ link B   ", l, n);
+            for (int i = 0; i < layer->neurones[n].inputs_size; i++) {
+                float w = layer->neurones[n].link_weights[1][i];
+                int gray_level = 232 + (int)(w * 23); // 232 à 255 = 24 niveaux
+                printf("│\x1b[38;5;%dm %6.3f \x1b[0m", gray_level, w); //---------------------------------------------------------------
+            }
+            printf("║\n");
+
         }
 
         // Séparateur horizontal après chaque couche

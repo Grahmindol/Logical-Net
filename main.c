@@ -16,8 +16,8 @@ float dloss(float y_pred, float y_true) {
 }
 
 // Fonction cible
-void target(bool* input, float* output){
-    output[0] = (float)((input[0] || input[1]) && (input[2] || input[3]) )* 2.0f - 1.0f;
+void target(bool* input, bool* output){
+    output[0] =(input[0] || input[1]) && (input[2] || input[3]);
 }
 
 int main() {
@@ -27,7 +27,7 @@ int main() {
     int layer_sizes[3] = {4, 2 , 1};
     Network *net = create_network(2, layer_sizes);
 
-    const float lr = 0.001f;
+    const float lr = 0.01f;
     const int epochs = 100000;
 
     for (int e = 0; e < epochs; e++) {
@@ -52,8 +52,12 @@ int main() {
             forward_network(net, inputs, outputs);
 
             // Cible
-            float target_outputs[1];
-            target(bin_inputs, target_outputs);
+            bool bin_outputs[1];
+            target(bin_inputs, bin_outputs);
+
+            float target_outputs[1] = {
+                (float)bin_outputs[0] * 2.0f - 1.0f
+            };
 
             // Gradient sortie
             float grad_out[1] = {
@@ -89,7 +93,7 @@ int main() {
         float outputs[1];
         forward_network(net, inputs, outputs);
 
-        float target_outputs[1];
+        bool target_outputs[1];
         target(bin_inputs, target_outputs);
 
         printf("a=%d b=%d c=%d d=%d → out=%.3f (target=%d)\n",

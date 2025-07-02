@@ -12,8 +12,9 @@ Layer create_layer(int size, int input_size) {
 }
 
 // Supprimer une couche
-void free_layer(Layer *layer) {
-    free(layer->neurones);
+void free_layer(Layer layer) {
+    for (int i = 0; i < layer.size; i++) free_neurone(layer.neurones[i]);
+    free(layer.neurones);
 }
 
 void backward_layer(Layer *l, float* inputs, float* grad_output, float* grad_in, float learning_rate){
