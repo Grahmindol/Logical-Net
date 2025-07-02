@@ -5,22 +5,22 @@
 typedef float (*LogicFunc)(float, float);
 typedef float (*LogicDeriv)(float, float);
 
-float logic_false(float a, float b) { return 0.0f; }
+float logic_false(float a, float b) { (void)a; (void)b; return 0.0f; }
 float logic_nor(float a, float b) { return (1 - a) * (1 - b); }
 float logic_nand_a(float a, float b) { return (1 - a) * b; }
-float logic_not_a(float a, float b) { return 1 - a; }
+float logic_not_a(float a, float b) { (void)b; return 1 - a; }
 float logic_nand_b(float a, float b) { return a * (1 - b); }
-float logic_not_b(float a, float b) { return 1 - b; }
+float logic_not_b(float a, float b) { (void)a; return 1 - b; }
 float logic_xor(float a, float b) { return a + b - 2 * a * b; }
 float logic_nand(float a, float b) { return 1 - a * b; }
 float logic_and(float a, float b) { return a * b; }
 float logic_xnor(float a, float b) { return a * b + (1 - a) * (1 - b); }
-float logic_b(float a, float b) { return b; }
+float logic_b(float a, float b) { (void)a; return b; }
 float logic_a_or_not_b(float a, float b) { return a + (1 - b) - a * (1 - b); }
-float logic_a(float a, float b) { return a; }
+float logic_a(float a, float b) { (void)b; return a; }
 float logic_not_a_or_b(float a, float b) { return (1 - a) + b - (1 - a) * b; }
 float logic_or(float a, float b) { return a + b - a * b; }
-float logic_true(float a, float b) { return 1.0f; }
+float logic_true(float a, float b) { (void)a; (void)b; return 1.0f; }
 
 LogicFunc logic_table[16] = {
     logic_false, logic_nor, logic_nand_a, logic_not_a,
@@ -30,40 +30,40 @@ LogicFunc logic_table[16] = {
 };
 
 // ∂f/∂a
-float dfa_false(float a, float b) { return 0.0f; }
-float dfa_nor(float a, float b) { return -(1 - b); }
-float dfa_nand_a(float a, float b) { return -b; }
-float dfa_not_a(float a, float b) { return -1.0f; }
-float dfa_nand_b(float a, float b) { return 1 - b; }
-float dfa_not_b(float a, float b) { return 0.0f; }
-float dfa_xor(float a, float b) { return 1 - 2 * b; }
-float dfa_nand(float a, float b) { return -b; }
-float dfa_and(float a, float b) { return b; }
-float dfa_xnor(float a, float b) { return b - (1 - b); }
-float dfa_b(float a, float b) { return 0.0f; }
-float dfa_a_or_not_b(float a, float b) { return 1 - (1 - b); }
-float dfa_a(float a, float b) { return 1.0f; }
-float dfa_not_a_or_b(float a, float b) { return -1 + b; }
-float dfa_or(float a, float b) { return 1 - b; }
-float dfa_true(float a, float b) { return 0.0f; }
+float dfa_false(float a, float b) { (void)a; (void)b; return 0.0f; }
+float dfa_nor(float a, float b) { (void)a; return -(1 - b); }
+float dfa_nand_a(float a, float b) { (void)a; return -b; }
+float dfa_not_a(float a, float b) { (void)a; (void)b; return -1.0f; }
+float dfa_nand_b(float a, float b) { (void)a; return 1 - b; }
+float dfa_not_b(float a, float b) { (void)a; (void)b; return 0.0f; }
+float dfa_xor(float a, float b) { (void)a; return 1 - 2 * b; }
+float dfa_nand(float a, float b) { (void)a; return -b; }
+float dfa_and(float a, float b) { (void)a; return b; }
+float dfa_xnor(float a, float b) { (void)a; return 2*b - 1; }
+float dfa_b(float a, float b) { (void)a; (void)b; return 0.0f; }
+float dfa_a_or_not_b(float a, float b) { (void)a; return b; }
+float dfa_a(float a, float b) { (void)a; (void)b; return 1.0f; }
+float dfa_not_a_or_b(float a, float b) { (void)a; return -1 + b; }
+float dfa_or(float a, float b) {(void)a;  return 1 - b; }
+float dfa_true(float a, float b) { (void)a; (void)b; return 0.0f; }
 
 // ∂f/∂b
-float dfb_false(float a, float b) { return 0.0f; }
-float dfb_nor(float a, float b) { return -(1 - a); }
-float dfb_nand_a(float a, float b) { return 1 - a; }
-float dfb_not_a(float a, float b) { return 0.0f; }
-float dfb_nand_b(float a, float b) { return -a; }
-float dfb_not_b(float a, float b) { return -1.0f; }
-float dfb_xor(float a, float b) { return 1 - 2 * a; }
-float dfb_nand(float a, float b) { return -a; }
-float dfb_and(float a, float b) { return a; }
-float dfb_xnor(float a, float b) { return a - (1 - a); }
-float dfb_b(float a, float b) { return 1.0f; }
-float dfb_a_or_not_b(float a, float b) { return -a + 1; }
-float dfb_a(float a, float b) { return 0.0f; }
-float dfb_not_a_or_b(float a, float b) { return 1 - (1 - a); }
-float dfb_or(float a, float b) { return 1 - a; }
-float dfb_true(float a, float b) { return 0.0f; }
+float dfb_false(float a, float b) { (void)a; (void)b; return 0.0f; }
+float dfb_nor(float a, float b) { (void)b; return -(1 - a); }
+float dfb_nand_a(float a, float b) { (void)b; return 1 - a; }
+float dfb_not_a(float a, float b) { (void)a; (void)b; return 0.0f; }
+float dfb_nand_b(float a, float b) { (void)b; return -a; }
+float dfb_not_b(float a, float b) { (void)a; (void)b; return -1.0f; }
+float dfb_xor(float a, float b) { (void)b; return 1 - 2 * a; }
+float dfb_nand(float a, float b) {(void)b;  return -a; }
+float dfb_and(float a, float b) { (void)b; return a; }
+float dfb_xnor(float a, float b) { (void)b; return 2*a - 1; }
+float dfb_b(float a, float b) { (void)a; (void)b; return 1.0f; }
+float dfb_a_or_not_b(float a, float b) { (void)b; return -a + 1; }
+float dfb_a(float a, float b) { (void)a; (void)b; return 0.0f; }
+float dfb_not_a_or_b(float a, float b) { (void)b; return a; }
+float dfb_or(float a, float b) { (void)b; return 1 - a; }
+float dfb_true(float a, float b) { (void)a; (void)b; return 0.0f; }
 
 // Tables
 LogicDeriv logic_deriv[2][16] = {{

@@ -43,7 +43,6 @@ void print_network(Network *net) {
     for (int i = 0; i < 15; i++) printf("════════╪");
     printf("════════╣\n");
 
-    int neuron_idx = 0;
     for (int l = 0; l < net->num_layers; l++) {
         Layer *layer = &net->layers[l];
         for (int n = 0; n < layer->size; n++) {
@@ -77,7 +76,7 @@ void forward_network(Network *net, float *inputs, float *final_outputs){
         outputs = (float *)malloc(sizeof(float) * layer->size);
         forward_layer(layer, current_in, outputs);
 
-        if (l != 0) free((void*)current_in);
+        if (current_in != inputs) free((void*)current_in);
         current_in = outputs;
     }
 
@@ -95,7 +94,7 @@ void backward_network(Network *net, float *grad_final, float learning_rate) {
     for (int l = net->num_layers - 1; l >= 0; l--) {
         Layer *layer = &net->layers[l];
 
-        grad_prev = (float *)malloc(sizeof(float) * layer->size * 2);
+        grad_prev = (float *)malloc(sizeof(float) * layer->input_size);
         backward_layer(layer, grad_current, grad_prev, learning_rate);
 
         if (l != net->num_layers - 1) free(grad_current);

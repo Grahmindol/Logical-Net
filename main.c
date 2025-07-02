@@ -20,12 +20,12 @@ void target(bool* input, float* output){
     output[0] = (input[0] || input[1]) && (input[2] || input[3]);
 }
 
-int main(int argc, char const *argv[]) {
+int main() {
     srand(time(NULL));
 
     // Architecture : 2 couches → 2 neurones, puis 1 neurone en sortie
-    int layer_sizes[5] = {4, 8, 4, 2, 1};
-    Network *net = create_network(4, layer_sizes);
+    int layer_sizes[3] = {4, 2, 1};
+    Network *net = create_network(2, layer_sizes);
 
     const float lr = 0.01f;
     const int epochs = 100000;
