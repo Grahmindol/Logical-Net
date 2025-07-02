@@ -13,5 +13,5 @@ void free_network(Network *net);
 void print_network(Network *net);
 
 void forward_network(Network *net, float *inputs, float *final_outputs);
-void backward_network(Network *net, float *grad_final, float learning_rate) ;
+void backward_network(Network *net, float* inputs, float *grad_final, float learning_rate);
 #endif

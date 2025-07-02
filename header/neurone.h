@@ -27,14 +27,14 @@ typedef struct {
     float logits[16];   // poids avant softmax
     float weights[16];  // poids softmaxés (proba)
     float output;
-    float a, b;
+    int id;             // the id in the layer
+    int a_id, b_id;     // the id of input neurone in the prev layer
 } Neurone;
 
-void free_neurone(Neurone *n);
-Neurone *create_neurone();
+Neurone create_neurone(int id, int size_in);
 
-void backward(Neurone *n, float grad_output, float learning_rate);
-float forward(Neurone *n, float a, float b);
+void backward(Neurone *n, float* in, float* grad_output, float learning_rate, float* grad_in);
+float forward(Neurone *n, float* in);
 
 void normalize_neurone_softmax(Neurone *n);
 int get_dominante_gate_id(Neurone *n);

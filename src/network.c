@@ -7,10 +7,7 @@ Network *create_network(int num_layers, int *layer_sizes) {
     Network *net = (Network*)malloc(sizeof(Network));
     net->num_layers = num_layers;
     net->layers = (Layer*)malloc(sizeof(Layer) * num_layers);
-
-    for (int i = 0; i < num_layers; i++) {
-        net->layers[i] = create_layer(layer_sizes[i+1], layer_sizes[i]);
-    }
+    for (int i = 0; i < num_layers; i++) net->layers[i] = create_layer(layer_sizes[i+1], layer_sizes[i]);
     return net;
 }
 
@@ -87,16 +84,27 @@ void forward_network(Network *net, float *inputs, float *final_outputs){
 }
 
 
-void backward_network(Network *net, float *grad_final, float learning_rate) {
+void backward_network(Network *net, float* inputs, float *grad_final, float learning_rate) {
     float *grad_current = grad_final;
     float *grad_prev = NULL;
+    float* prev_out = NULL;
 
     for (int l = net->num_layers - 1; l >= 0; l--) {
         Layer *layer = &net->layers[l];
 
-        grad_prev = (float *)malloc(sizeof(float) * layer->input_size);
-        backward_layer(layer, grad_current, grad_prev, learning_rate);
+        if (l > 0) {
+            prev_out = (float*)malloc(layer->input_size * sizeof(float));
+            for (int i = 0; i < layer->input_size; i++) {
+                prev_out[i] = net->layers[l-1].neurones[i].output;
+            }
+        } else {
+            prev_out = inputs;
+        }
 
+        grad_prev = (float *)malloc(sizeof(float) * layer->input_size);
+        backward_layer(layer, prev_out, grad_current, grad_prev, learning_rate);
+
+        if (prev_out != inputs) free(prev_out);
         if (l != net->num_layers - 1) free(grad_current);
         grad_current = grad_prev;
     }

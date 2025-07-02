@@ -63,7 +63,7 @@ int main() {
             total_loss += loss(outputs[0], target_outputs[0]);
 
             // Rétroprop (attention : grad_size = 1 ici)
-            backward_network(net, grad_out, lr);
+            backward_network(net, inputs, grad_out, lr);
         }
 
         if (e % 5000 == 0) {

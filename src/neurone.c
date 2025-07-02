@@ -78,25 +78,27 @@ LogicDeriv logic_deriv[2][16] = {{
     dfb_a, dfb_not_a_or_b, dfb_or, dfb_true
 }};
 
+void get_input_ids(int id, int size_in, int* a, int* b){
+    *a = (id * 2 + (int)(id/size_in))%size_in;
+    *b = (id * 2 + 1 + (int)(id/size_in))%size_in;
+}
+
 // Créer un neurone
-Neurone *create_neurone() {
-    Neurone *n = (Neurone*)malloc(sizeof(Neurone));
+Neurone create_neurone(int i, int size_in) {
+    Neurone n;
+    n.id = i;
+    get_input_ids(i, size_in, &n.a_id, &n.b_id);
     for (int i = 0; i < 16; i++) {
-        n->logits[i] = ((float)rand() / RAND_MAX) * 2.0f - 1.0f;
+        n.logits[i] = ((float)rand() / RAND_MAX) * 2.0f - 1.0f;
     }
-    normalize_neurone_softmax(n);
+    normalize_neurone_softmax(&n);
     return n;
 }
 
-// Supprimer un neurone
-void free_neurone(Neurone *n) {
-    free(n);
-}
-
-float gradient_neurone(Neurone *n, int input_id) {
+float gradient_neurone(Neurone *n, float* inputs, int input_id) {
     float sum = 0;
     for (int i = 0; i < 16; i++) {
-        sum += n->weights[i] * logic_deriv[input_id&1][i](n->a, n->b);
+        sum += n->weights[i] * logic_deriv[input_id&1][i](inputs[n->a_id], inputs[n->b_id]);
     }
     return sum;
 }
@@ -132,9 +134,9 @@ void normalize_neurone_softmax(Neurone *n) {
 }
 
 
-float forward(Neurone *n, float a, float b) {
-    n->a = a;
-    n->b = b;
+float forward(Neurone *n, float* in) {
+    float a = in[n->a_id];
+    float b = in[n->b_id];
     float out = 0.0f;
     for (int i = 0; i < 16; i++)
         out += n->weights[i] * logic_table[i](a, b);
@@ -142,15 +144,16 @@ float forward(Neurone *n, float a, float b) {
     return out;
 }
 
-void backward(Neurone *n, float grad_output, float learning_rate) {
+void backward(Neurone *n,float* in, float* grad_output, float learning_rate, float* grad_in) {
     float grad_logits[16] = {0};
     // Gradient des logits via chain rule softmax
     // dL/dz_j = sum_i dL/dw_i * dw_i/dz_j
     // dw_i/dz_j = softmax_i * (delta_ij - softmax_j)
     // Ici : dL/dw_i = grad_output * logic_table[i](a,b)
+
     float grad_w[16];
     for (int i = 0; i < 16; i++) {
-        grad_w[i] = grad_output * logic_table[i](n->a, n->b);
+        grad_w[i] = grad_output[n->id] * logic_table[i](in[n->a_id], in[n->b_id]);
     }
     // Calcul dL/dz_j
     for (int j = 0; j < 16; j++) {
@@ -166,4 +169,9 @@ void backward(Neurone *n, float grad_output, float learning_rate) {
         n->logits[i] -= learning_rate * grad_logits[i];
     }
     normalize_neurone_softmax(n);
+
+
+    
+    grad_in[n->a_id] += gradient_neurone(n, in, 0) * grad_output[n->id];
+    grad_in[n->b_id] += gradient_neurone(n, in, 1) * grad_output[n->id];
 }
