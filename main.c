@@ -17,17 +17,17 @@ float dloss(float y_pred, float y_true) {
 
 // Fonction cible
 void target(bool* input, float* output){
-    output[0] = (input[0] || input[1]) && (input[2] || input[3]);
+    output[0] = (float)((input[0] || input[1]) && (input[2] || input[3]) )* 2.0f - 1.0f;
 }
 
 int main() {
     srand(time(NULL));
 
     // Architecture : 2 couches → 2 neurones, puis 1 neurone en sortie
-    int layer_sizes[3] = {4, 2, 1};
+    int layer_sizes[3] = {4, 2 , 1};
     Network *net = create_network(2, layer_sizes);
 
-    const float lr = 0.01f;
+    const float lr = 0.001f;
     const int epochs = 100000;
 
     for (int e = 0; e < epochs; e++) {
@@ -42,10 +42,10 @@ int main() {
                 (i >> 0) & 1
             };
             float inputs[4] = {
-                (float)bin_inputs[0],
-                (float)bin_inputs[1],
-                (float)bin_inputs[2],
-                (float)bin_inputs[3]
+                (float)bin_inputs[0] * 2.0f - 1.0f,
+                (float)bin_inputs[1] * 2.0f - 1.0f,
+                (float)bin_inputs[2] * 2.0f - 1.0f,
+                (float)bin_inputs[3] * 2.0f - 1.0f
             };
 
             float outputs[1];
@@ -81,10 +81,10 @@ int main() {
             (i >> 0) & 1
         };
         float inputs[4] = {
-            (float)bin_inputs[0],
-            (float)bin_inputs[1],
-            (float)bin_inputs[2],
-            (float)bin_inputs[3]
+            (float)bin_inputs[0] * 2.0f - 1.0f,
+            (float)bin_inputs[1] * 2.0f - 1.0f,
+            (float)bin_inputs[2] * 2.0f - 1.0f,
+            (float)bin_inputs[3] * 2.0f - 1.0f
         };
         float outputs[1];
         forward_network(net, inputs, outputs);
